@@ -2,6 +2,8 @@ mod utils;
 mod parsers;
 
 use std::{fs::read_dir, thread::JoinHandle};
+use colored::Colorize;
+
 fn main() {
     // Parse config file
     let config = utils::config::parse_config();
@@ -13,19 +15,19 @@ fn main() {
             package_directories.push(path.to_str().unwrap().to_string());
         }
     }
-    println!("Detected {:?} package directories: {:?}", package_directories.len(), package_directories);
+    println!("{} {:?} {} {:?}", "Discovered".green(), package_directories.len(), "package directories:".green(), package_directories);
     // Process each package, in parallel
     let mut handles = vec![];
     for package in package_directories {
         let cloned_config = utils::config::parse_config();
         if (handles.len() as u32) >= cloned_config.max_threads {
             // Wait for a thread to finish
-            println!("Hit max threads, waiting for a thread to finish");
+            println!("{}", "Hit max threads, waiting for a thread to finish".yellow());
             let handle: JoinHandle<()> = handles.remove(0);
             handle.join().unwrap();
         }
         let handle = std::thread::spawn(move || {
-            println!("Processing package: {:?}", package);
+            println!("{} {:?}", "Processing package:".green(), package);
             // Process package
             parsers::process_package(package); // Use the cloned config variable
         });

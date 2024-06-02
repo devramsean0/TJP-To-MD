@@ -7,6 +7,7 @@ pub struct Config {
     pub input_dir: String,
     pub output_dir: String,
     pub max_threads: u32,
+    pub regen_all: bool,
 }
 
 pub fn parse_config() -> Config {

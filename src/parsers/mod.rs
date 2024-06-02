@@ -2,9 +2,12 @@ mod metadata;
 mod classes;
 mod enums;
 mod interfaces;
+mod functions;
+mod variable;
 
 use std::{fs, path::Path};
 use crate::utils::config::parse_config;
+use colored::Colorize;
 
 // All Parser stuff
 pub fn process_package(path: String) {
@@ -22,12 +25,12 @@ pub fn process_package(path: String) {
         if version.as_ref().unwrap().path().is_file() {
             // Fix the version path folder
             let version_folder_path = version.as_ref().unwrap().path().to_string_lossy().replace(&config.input_dir, &config.output_dir).replace(".json", "");
-            if Path::new(&version_folder_path).exists() {
-                println!("Skipping version folder: {:?}", &version_folder_path);
+            if Path::new(&version_folder_path).exists() && !config.regen_all {
+                println!("{} {:?}", "Skipping version folder:".red(), &version_folder_path);
                 continue;
             }
-            if fs::create_dir(&version_folder_path).is_err() {
-                println!("Failed to create version folder: {:?}", &version_folder_path);
+            if fs::create_dir(&version_folder_path).is_err() && !config.regen_all {
+                println!("{} {:?}", "Failed to create version folder:".red(), &version_folder_path);
                 continue;
             }
             // Actually process the json file
@@ -37,6 +40,8 @@ pub fn process_package(path: String) {
             classes::process_classes(&parsed_file, &version_folder_path);
             enums::process_enums(&parsed_file, &version_folder_path);
             interfaces::process_interfaces(&parsed_file, &version_folder_path);
+            functions::process_functions(&parsed_file, &version_folder_path);
+            variable::process_variables(&parsed_file, &version_folder_path);
         }
     }
 }
