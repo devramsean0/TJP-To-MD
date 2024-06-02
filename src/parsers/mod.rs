@@ -21,7 +21,7 @@ pub fn process_package(path: String) {
         }
     }
     // For each version, process it if the folder doesn't exist yet
-    for version in fs::read_dir(path).unwrap() {
+    for version in fs::read_dir(path).unwrap().filter(|x| x.as_ref().unwrap().file_name().to_string_lossy().ends_with(".json")) {
         if version.as_ref().unwrap().path().is_file() {
             // Fix the version path folder
             let version_folder_path = version.as_ref().unwrap().path().to_string_lossy().replace(&config.input_dir, &config.output_dir).replace(".json", "");
@@ -35,13 +35,18 @@ pub fn process_package(path: String) {
             }
             // Actually process the json file
             let file = fs::read_to_string(version.as_ref().unwrap().path()).unwrap();
-            let parsed_file = json::parse(file.as_str()).unwrap();
-            metadata::process_metadata(&parsed_file, &version_folder_path);
-            classes::process_classes(&parsed_file, &version_folder_path);
-            enums::process_enums(&parsed_file, &version_folder_path);
-            interfaces::process_interfaces(&parsed_file, &version_folder_path);
-            functions::process_functions(&parsed_file, &version_folder_path);
-            variable::process_variables(&parsed_file, &version_folder_path);
+            let parsed_file = json::parse(file.as_str());
+            if parsed_file.is_err() {
+                println!("{} {:?} {} {:?}", "Failed to parse file:".red(), version.as_ref().unwrap().path(), "with error:".red(), parsed_file.err());
+                continue;
+            }
+            let unwrapped_parsed_file = &parsed_file.unwrap();
+            metadata::process_metadata(&unwrapped_parsed_file, &version_folder_path);
+            classes::process_classes(&unwrapped_parsed_file, &version_folder_path);
+            enums::process_enums(&unwrapped_parsed_file, &version_folder_path);
+            interfaces::process_interfaces(&unwrapped_parsed_file, &version_folder_path);
+            functions::process_functions(&unwrapped_parsed_file, &version_folder_path);
+            variable::process_variables(&unwrapped_parsed_file, &version_folder_path);
         }
     }
 }
