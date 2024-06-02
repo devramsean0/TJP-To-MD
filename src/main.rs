@@ -1,19 +1,49 @@
 mod utils;
 mod parsers;
 
-use std::{fs::read_dir, thread::JoinHandle};
+use std::{fs::{self, read_dir}, thread::JoinHandle};
 use colored::Colorize;
-use clap::Parser;
+use clap::{Parser, Subcommand};
+use utils::config::Config;
 
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Generates a new config file
+    Generate {
+        
+    }
 }
 
 fn main() {
-    //let cli = Cli::parse();
-    println!("{}", "Starting parsing".green());
-    start_parse();
+    let cli = Cli::parse();
+    println!("{}", "Typedoc Json Parser to Markdown converter Initialized".green());
+    match &cli.command {
+        Some(Commands::Generate {}) => {
+            let config = Config {
+                input_dir: "".to_string(),
+                output_dir: "".to_string(),
+                max_threads: 5,
+                regen_all: false
+            };
+            let toml_string = toml::to_string(&config).unwrap();
+            if fs::write("tjp_to_md.toml", toml_string).is_err() {
+                println!("{}", "Failed to write config file".red());
+            } else {
+                println!("{}", "Successfully wrote config file, please go and edit it :)".green());
+            
+            }
+        }
+        None => {
+            start_parse();
+        }
+    }
 }
 
 fn start_parse() {
