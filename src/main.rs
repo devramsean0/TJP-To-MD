@@ -3,8 +3,20 @@ mod parsers;
 
 use std::{fs::read_dir, thread::JoinHandle};
 use colored::Colorize;
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Cli {
+}
 
 fn main() {
+    //let cli = Cli::parse();
+    println!("{}", "Starting parsing".green());
+    start_parse();
+}
+
+fn start_parse() {
     // Parse config file
     let config = utils::config::parse_config();
     // Find a list of packages
