@@ -30,7 +30,8 @@ fn main() {
                 input_dir: "".to_string(),
                 output_dir: "".to_string(),
                 max_threads: 5,
-                regen_all: false
+                regen_all: false,
+                gen_metadata_in_file: true
             };
             let toml_string = toml::to_string(&config).unwrap();
             if fs::write("tjp_to_md.toml", toml_string).is_err() {

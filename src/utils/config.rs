@@ -8,6 +8,7 @@ pub struct Config {
     pub output_dir: String,
     pub max_threads: u32,
     pub regen_all: bool,
+    pub gen_metadata_in_file: bool,
 }
 
 pub fn parse_config() -> Config {

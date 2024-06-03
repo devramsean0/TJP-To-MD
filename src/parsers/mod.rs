@@ -5,9 +5,10 @@ mod interfaces;
 mod functions;
 mod variable;
 
-use std::{fs, path::Path};
+use std::{borrow::Borrow, fs, path::Path};
 use crate::utils::config::parse_config;
 use colored::Colorize;
+use json::object;
 
 // All Parser stuff
 pub fn process_package(path: String) {
@@ -21,8 +22,10 @@ pub fn process_package(path: String) {
         }
     }
     // For each version, process it if the folder doesn't exist yet
+    let mut versions: Vec<String> = vec![];
     for version in fs::read_dir(path).unwrap().filter(|x| x.as_ref().unwrap().file_name().to_string_lossy().ends_with(".json")) {
         if version.as_ref().unwrap().path().is_file() {
+            versions.push(version.borrow().as_ref().unwrap().path().to_string_lossy().replace(&config.input_dir, ""));
             // Fix the version path folder
             let version_folder_path = version.as_ref().unwrap().path().to_string_lossy().replace(&config.input_dir, &config.output_dir).replace(".json", "");
             if Path::new(&version_folder_path).exists() && !config.regen_all {
@@ -48,5 +51,11 @@ pub fn process_package(path: String) {
             functions::process_functions(&unwrapped_parsed_file, &version_folder_path);
             variable::process_variables(&unwrapped_parsed_file, &version_folder_path);
         }
+    }
+    if !Path::new(format!("{}/metadata.def", &output_path).as_str()).exists() && !config.regen_all {
+        let metadata = object!{
+            versions: versions
+        };
+        fs::write(format!("{}/metadata", &output_path), metadata.dump()).unwrap();
     }
 }
