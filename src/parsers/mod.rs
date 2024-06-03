@@ -56,6 +56,6 @@ pub fn process_package(path: String) {
         let metadata = object!{
             versions: versions
         };
-        fs::write(format!("{}/metadata", &output_path), metadata.dump()).unwrap();
+        fs::write(format!("{}/metadata.def", &output_path), metadata.dump()).unwrap();
     }
 }
